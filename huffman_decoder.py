@@ -37,7 +37,6 @@ class H_tree: # Huffman tree
             self._view(node.left)
             print(node.val, end = " ")
             self._view(node.right)
-
     def decode(self, word):
         pass
 
