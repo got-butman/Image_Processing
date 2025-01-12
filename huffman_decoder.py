@@ -1,3 +1,5 @@
+import re
+
 class Node: # Standard recursive node adapted to track layer for assisting decoding 
     def __init__(self, val, layer):
         self.val = val
@@ -37,8 +39,27 @@ class H_tree: # Huffman tree
             self._view(node.left)
             print(node.val, end = " ")
             self._view(node.right)
-    def decode(self, word):
-        pass
+
+    def decode(self, PATH):
+        decoded = []
+        node = self.root
+        f = open(PATH, 'r')
+        dat = f.read()
+        dat = re.split('\s | \n', dat)
+
+        while len(dat):
+            byte = int(dat.pop(0), 16) 
+            for i in range(8):
+                if byte & (0b10000000 >> i):
+                    node = node.right
+                else:
+                    node = node.left
+                
+                if node.left == None and node.right == None:
+                    decoded.append(node.val)
+                    node = self.root
+
+
 
     
 

@@ -1,5 +1,6 @@
 import numpy as np
 import turtle
+from huffman_decoder import *
 #t = turtle.Turtle()
 #screen = turtle.Screen()
 #screen.bgcolor("white")
