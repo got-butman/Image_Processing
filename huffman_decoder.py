@@ -10,6 +10,10 @@ class Node: # Standard recursive node adapted to track layer for assisting decod
 class H_tree: # Huffman tree
     def __init__(self):
         self.root = Node(-1, None)
+        
+        # To help keep track while decoding
+        self.dec_pos = 0
+        self.last_byte = 0
 
     def gen(self, count, sym):
         self.root.left = Node(None,  0)
@@ -40,26 +44,28 @@ class H_tree: # Huffman tree
             print(node.val, end = " ")
             self._view(node.right)
 
-    def decode(self, PATH):
-        decoded = []
+    def decode(self, dat):
+        decoded = 0
         node = self.root
-        f = open(PATH, 'r')
-        dat = f.read()
-        dat = re.split('\s | \n', dat)
 
         while len(dat):
-            byte = int(dat.pop(0), 16) 
-            for i in range(8):
-                if byte & (0b10000000 >> i):
+            if not self.dec_pos:
+                self.last_byte = int(dat.pop(0), 16)
+
+            for i in range(self.dec_pos, 8):
+
+                if self.last_byte & (0b10000000 >> i):
                     node = node.right
                 else:
                     node = node.left
                 
-                if node.left == None and node.right == None:
-                    decoded.append(node.val)
-                    node = self.root
-
-
+                self.dec_pos += 1
+                self.dec_pos = self.dec_pos % 8
+                
+                if (node.left == None) and (node.right == None):
+                    decoded = node.val
+                    return decoded, dat
+                
 
     
 
