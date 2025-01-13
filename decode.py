@@ -75,6 +75,7 @@ decoded, dat = H01.decode(dat)
 
 H11.last_byte = H01.last_byte
 H11.dec_pos = H01.dec_pos + decoded
+MCU.append(dc)
 
 
 for i in range(1):
@@ -95,7 +96,8 @@ for i in range(1):
             size -= 1
     print(val)
 
+    print(BitStream(size, val, bitstream))
 
+    MCU += zeros * [0]
+    MCU.append(BitStream(size, val, bitstream))
 
-
-    print(BitStream(size, 0b11110, bitstream))
