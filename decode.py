@@ -31,7 +31,16 @@ DQT1 = [ 17, 18, 24, 47, 99, 99, 99, 99,
          99, 99, 99, 99, 99, 99, 99, 99 ]
 
 # Huffman tables
-bitstream = [-1, 1] + list(range(-3, -1)) + list(range(2, 4)) + list(range(-7, -3)) + list(range(4, 8)) + list(range(-15, -7)) + list(range(8, 16)) + list(range(-31, -15)) + list(range(16, 32)) + list(range(-63, -31)) + list(range(32, 64))
+bitstream = [[0], [-1, 1], list(range(-3, -1)) + list(range(2, 4)), list(range(-7, -3)) + list(range(4, 8)), list(range(-15, -7)) + list(range(8, 16)), list(range(-31, -15)) + list(range(16, 32)), list(range(-63, -31)) + list(range(32, 64))]
+
+def BitStream(category, bits, stream):
+    stream[category]
+
+    if bits < 2**(category - 1):
+        val = 1 - 2**(category) + bits
+    else:
+        val = bits
+    return val
 
 
 DHT10 = "10 00 02 01 03 03 02 04 03 05 05 04 04 00 00 01 7D 01 02 03 00 04 11 05 12 21 31 41 06 13 51 61 07 22 71 14 32 81 91 A1 08 23 42 B1 C1 15 52 D1 F0 24 33 62 72 82 09 0A 16 17 18 19 1A 25 26 27 28 29 2A 34 35 36 37 38 39 3A 43 44 45 46 47 48 49 4A 53 54 55 56 57 58 59 5A 63 64 65 66 67 68 69 6A 73 74 75 76 77 78 79 7A 83 84 85 86 87 88 89 8A 92 93 94 95 96 97 98 99 9A A2 A3 A4 A5 A6 A7 A8 A9 AA B2 B3 B4 B5 B6 B7 B8 B9 BA C2 C3 C4 C5 C6 C7 C8 C9 CA D2 D3 D4 D5 D6 D7 D8 D9 DA E1 E2 E3 E4 E5 E6 E7 E8 E9 EA F1 F2 F3 F4 F5 F6 F7 F8 F9 FA"
@@ -67,6 +76,26 @@ decoded, dat = H01.decode(dat)
 H11.last_byte = H01.last_byte
 H11.dec_pos = H01.dec_pos + decoded
 
-for i in range(11):
+
+for i in range(1):
     decoded, dat = H11.decode(dat)
-    #print(decoded)
+    zeros = (decoded & 0xf0) >> 4
+    size = decoded & 0x0f
+    val = 0
+    while size:
+        if not H11.dec_pos:
+            H11.last_byte = int(dat.pop(0), 16)
+        
+        for i in range(H11.dec_pos, 8):
+            if not size:
+                break
+            val += H11.last_byte & (0b10000000 >> i)
+            H11.dec_pos += 1
+            H11.dec_pos = H11.dec_pos % 8
+            size -= 1
+    print(val)
+
+
+
+
+    print(BitStream(size, 0b11110, bitstream))
