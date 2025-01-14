@@ -1,14 +1,64 @@
 import numpy as np
+import math
 import turtle
 from huffman_decoder import *
-#t = turtle.Turtle()
-#screen = turtle.Screen()
-#screen.bgcolor("white")
+t = turtle.Turtle()
+screen = turtle.Screen()
+screen.bgcolor("white")
 
 def draw_pixel(turtle, x, y, color):  # color is a tuple here
     turtle.setposition(x, y)
     turtle.dot(1, color)
     return
+
+def matrix_operations(ZZ, MCU, quant):
+    temp = [0] * 64
+    for i in range(64):
+        temp[ZZ[i]] = MCU[i]
+    for i in range(64):
+        temp[i] *= quant[i]
+    MCU = [list(range(8)) for i in range(8)]
+    for i in range(8):
+        for j in range(8):
+            MCU[i][j] = temp[i + j]
+    return MCU
+
+def NormCoeff(n):
+    if n == 0:
+        return 1.0 / math.sqrt(2.0)
+    else:
+        return 1.0
+
+idct_table = [
+        [
+            (NormCoeff(u) * math.cos(((2.0 * x + 1.0) * u * math.pi) / 16.0))
+            for x in range(8)
+        ]
+        for u in range(8)
+    ]
+
+def IDCT(MCU, idct_table):
+        out = [list(range(8)) for i in range(8)]
+
+        for x in range(8):
+            for y in range(8):
+                local_sum = 0
+                for u in range(8):
+                    for v in range(8):
+                        local_sum += (
+                            MCU[v][u]
+                            * idct_table[u][x]
+                            * idct_table[v][y]
+                        )
+                out[y][x] = local_sum // 4
+                return out
+    
+        
+        
+
+
+
+zigzag = [0, 1, 5, 6, 14, 15, 27, 28, 2, 4, 7, 13, 16, 26, 29, 42, 3, 8, 12, 17, 25, 30, 41, 43, 9, 11, 18, 24, 31, 40, 44, 53, 10, 19, 23, 32, 39, 45, 52, 54, 20, 22, 33, 38, 46, 51, 55, 60, 21, 34, 37, 47, 50, 56, 59, 61, 35, 36, 48, 49, 57, 58, 62, 63]
 
 # Quantization tables
 
@@ -120,5 +170,14 @@ while len(dat):
             H01.dec_pos = H11.dec_pos + decoded
             break
 
-    print(MCU)
+    MCU += [0] * (64 - len(MCU))
+    out = IDCT(matrix_operations(zigzag, MCU, DQT0), idct_table)
+    
+    print(out)
+    for i in range(8):
+        for j in range(8):
+            #draw_pixel(t, i, j, (out[i][j]))
+            quit
+
+    
 
