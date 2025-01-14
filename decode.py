@@ -66,38 +66,59 @@ dat = f.read()
 dat = re.split(' |\n', dat)
 
 MCU = []
-
 dc = 0
-decoded, dat = H01.decode(dat)
 
-# this section of code genuinely makes me sick but I had no choice
-#dc += (H01.last_byte & (0b10000000 >> (H01.dec_pos + decoded - 1)))/2**(7 - decoded)
+while len(dat):
+    decoded, dat = H01.decode(dat)
+    size = decoded
+    dc_temp = 0
 
-H11.last_byte = H01.last_byte
-H11.dec_pos = H01.dec_pos + decoded
-MCU.append(dc)
-
-
-for i in range(1):
-    decoded, dat = H11.decode(dat)
-    zeros = (decoded & 0xf0) >> 4
-    size = decoded & 0x0f
-    val = 0
     while size:
-        if not H11.dec_pos:
-            H11.last_byte = int(dat.pop(0), 16)
+        if not H01.dec_pos:
+            H01.last_byte = int(dat.pop(0), 16)
+    
+        shift = 8 - size - H01.dec_pos
         
-        for i in range(H11.dec_pos, 8):
+        for i in range(H01.dec_pos, 8):
             if not size:
                 break
-            val += H11.last_byte & (0b10000000 >> i)
-            H11.dec_pos += 1
-            H11.dec_pos = H11.dec_pos % 8
+            dc_temp += (H01.last_byte & (0b10000000 >> i))/2**(shift)
+            H01.dec_pos += 1
+            H01.dec_pos = H01.dec_pos % 8
             size -= 1
-    print(val)
 
-    print(BitStream(size, val, bitstream))
 
-    MCU += zeros * [0]
-    MCU.append(BitStream(size, val, bitstream))
+    dc += BitStream(decoded, dc_temp, bitstream)
+    MCU.append(dc)
+
+    H11.last_byte = H01.last_byte
+    H11.dec_pos = H01.dec_pos
+
+    while 1:
+        decoded, dat = H11.decode(dat)
+        zeros = (decoded & 0xf0) >> 4
+        MCU += zeros * [0]
+        size = decoded & 0x0f
+        val = 0
+        while size:
+            if not H11.dec_pos:
+                H11.last_byte = int(dat.pop(0), 16)
+        
+            shift = 8 - size - H11.dec_pos
+        
+            for i in range(H11.dec_pos, 8):
+                if not size:
+                    break
+                val += (H11.last_byte & (0b10000000 >> i))/2**(shift)
+                H11.dec_pos += 1
+                H11.dec_pos = H11.dec_pos % 8
+                size -= 1
+
+        MCU.append(BitStream(decoded & 0x0f, val, bitstream))
+        if not BitStream(decoded & 0x0f, val, bitstream):
+            H01.last_byte = H11.last_byte
+            H01.dec_pos = H11.dec_pos + decoded
+            break
+
+    print(MCU)
 
