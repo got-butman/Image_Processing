@@ -11,6 +11,14 @@ def draw_pixel(turtle, x, y, color):  # color is a tuple here
     turtle.dot(1, color)
     return
 
+def clamp(num):
+    if num < 0:
+        return 0
+    elif num > 256:
+        return 256
+    else:
+        return num
+    
 def matrix_operations(ZZ, MCU, quant):
     temp = [0] * 64
     for i in range(64):
@@ -52,10 +60,6 @@ def IDCT(MCU, idct_table):
                         )
                 out[y][x] = local_sum // 4
                 return out
-    
-        
-        
-
 
 
 zigzag = [0, 1, 5, 6, 14, 15, 27, 28, 2, 4, 7, 13, 16, 26, 29, 42, 3, 8, 12, 17, 25, 30, 41, 43, 9, 11, 18, 24, 31, 40, 44, 53, 10, 19, 23, 32, 39, 45, 52, 54, 20, 22, 33, 38, 46, 51, 55, 60, 21, 34, 37, 47, 50, 56, 59, 61, 35, 36, 48, 49, 57, 58, 62, 63]
@@ -115,10 +119,10 @@ f = open('dat.txt', 'r')
 dat = f.read()
 dat = re.split(' |\n', dat)
 
-MCU = []
 dc = 0
 
 while len(dat):
+    MCU = []
     decoded, dat = H01.decode(dat)
     size = decoded
     dc_temp = 0
@@ -173,7 +177,6 @@ while len(dat):
     MCU += [0] * (64 - len(MCU))
     out = IDCT(matrix_operations(zigzag, MCU, DQT0), idct_table)
     
-    print(out)
     for i in range(8):
         for j in range(8):
             #draw_pixel(t, i, j, (out[i][j]))
