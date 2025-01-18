@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.fftpack import idct
 import math
 import turtle
 from huffman_decoder import *
@@ -12,77 +13,66 @@ def draw_pixel(turtle, x, y, color):  # color is a tuple here
     return
 
 def clamp(num):
-    if num < 0:
-        return 0
-    elif num > 256:
-        return 256
-    else:
-        return num
+    if num < 0: return 0
+    elif num > 256: return 256
+    else: return num
+
+def IDCT(array_8x8):
+    # Perform IDCT along rows (axis=1)
+    idct_rows = idct(array_8x8, axis=1, norm='ortho')
+
+    # Perform IDCT along columns (axis=0)
+    idct_2d = idct(idct_rows, axis=0, norm='ortho')
+
+    return idct_2d
     
 def matrix_operations(ZZ, MCU, quant):
-    temp = [0] * 64
     for i in range(64):
-        temp[ZZ[i]] = MCU[i]
-    for i in range(64):
-        temp[i] *= quant[i]
-    MCU = [list(range(8)) for i in range(8)]
+        MCU[i] *= quant[i]
+    ret = [[0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0]]
     for i in range(8):
         for j in range(8):
-            MCU[i][j] = temp[i + j]
-    return MCU
-
-def NormCoeff(n):
-    if n == 0:
-        return 1.0 / math.sqrt(2.0)
-    else:
-        return 1.0
-
-idct_table = [
-        [
-            (NormCoeff(u) * math.cos(((2.0 * x + 1.0) * u * math.pi) / 16.0))
-            for x in range(8)
-        ]
-        for u in range(8)
-    ]
-
-def IDCT(MCU, idct_table):
-        out = [list(range(8)) for i in range(8)]
-
-        for x in range(8):
-            for y in range(8):
-                local_sum = 0
-                for u in range(8):
-                    for v in range(8):
-                        local_sum += (
-                            MCU[v][u]
-                            * idct_table[u][x]
-                            * idct_table[v][y]
-                        )
-                out[y][x] = local_sum // 4
-                return out
+            ret[i][j] = MCU[ZZ[i][j]]
+    #print(ret)
+    #print('-------------')
+    return ret
 
 
-zigzag = [0, 1, 5, 6, 14, 15, 27, 28, 2, 4, 7, 13, 16, 26, 29, 42, 3, 8, 12, 17, 25, 30, 41, 43, 9, 11, 18, 24, 31, 40, 44, 53, 10, 19, 23, 32, 39, 45, 52, 54, 20, 22, 33, 38, 46, 51, 55, 60, 21, 34, 37, 47, 50, 56, 59, 61, 35, 36, 48, 49, 57, 58, 62, 63]
+zigzag = [[0, 1, 5, 6, 14, 15, 27, 28],
+          [2, 4, 7, 13, 16, 26, 29, 42],
+          [3, 8, 12, 17, 25, 30, 41, 43],
+          [9, 11, 18, 24, 31, 40, 44, 53],
+          [10, 19, 23, 32, 39, 45, 52, 54],
+          [20, 22, 33, 38, 46, 51, 55, 60],
+          [21, 34, 37, 47, 50, 56, 59, 61],
+          [35, 36, 48, 49, 57, 58, 62, 63]]
 
 # Quantization tables
 
-DQT0 = [ 16, 11, 10, 16, 24, 40, 51, 61,
-         12, 12, 14, 19, 26, 58, 60, 55, 
-         14, 13, 16, 24, 40, 57, 69, 56, 
-         14, 17, 22, 29, 51, 87, 80, 62, 
-         18, 22, 37, 56, 68, 109, 103, 77, 
-         24, 35, 55, 64, 81, 104, 113, 92, 
-         49, 64, 78, 87, 103, 121, 120, 101,
-         72, 92, 95, 98, 112, 100, 103, 99 ]
+DQT0 = [ 10, 7, 6, 10, 15, 25, 32, 38,
+         8, 8, 9, 12, 16, 36, 38, 34, 
+         9, 8, 10, 15, 25, 36, 43, 35, 
+         9, 11, 14, 18, 32, 54, 50, 39, 
+         11, 14, 23, 35, 43, 68, 64, 48, 
+         15, 22, 34, 40, 51, 65, 71, 58, 
+         31, 40, 49, 54, 64, 76, 75, 63,
+         45, 58, 59, 61, 70, 63, 64, 62 ]
 
-DQT1 = [ 17, 18, 24, 47, 99, 99, 99, 99,
-         18, 21, 26, 66, 99, 99, 99, 99, 
-         24, 26, 56, 99, 99, 99, 99, 99, 
-         47, 66, 99, 99, 99, 99, 99, 99, 
-         99, 99, 99, 99, 99, 99, 99, 99, 
-         99, 99, 99, 99, 99, 99, 99, 99, 
-         99, 99, 99, 99, 99, 99, 99, 99, 
-         99, 99, 99, 99, 99, 99, 99, 99 ]
+DQT1 = [ 11, 11, 15, 29, 62, 62, 62, 62,
+         11, 13, 16, 41, 62, 62, 62, 62, 
+         15, 16, 35, 62, 62, 62, 62, 62, 
+         29, 41, 62, 62, 62, 62, 62, 62, 
+         62, 62, 62, 62, 62, 62, 62, 62, 
+         62, 62, 62, 62, 62, 62, 62, 62, 
+         62, 62, 62, 62, 62, 62, 62, 62, 
+         62, 62, 62, 62, 62, 62, 62, 62 ]
 
 # Huffman tables
 bitstream = [[0], [-1, 1], list(range(-3, -1)) + list(range(2, 4)), list(range(-7, -3)) + list(range(4, 8)), list(range(-15, -7)) + list(range(8, 16)), list(range(-31, -15)) + list(range(16, 32)), list(range(-63, -31)) + list(range(32, 64))]
@@ -121,7 +111,8 @@ dat = re.split(' |\n', dat)
 
 dc = 0
 
-while len(dat):
+#while len(dat):
+for m in range(10):
     MCU = []
     decoded, dat = H01.decode(dat)
     size = decoded
@@ -175,12 +166,13 @@ while len(dat):
             break
 
     MCU += [0] * (64 - len(MCU))
-    out = IDCT(matrix_operations(zigzag, MCU, DQT0), idct_table)
-    
+    out = np.array(matrix_operations(zigzag, MCU, DQT1), dtype=float)
+    print(IDCT(out))
+    print('  ')
     for i in range(8):
         for j in range(8):
-            #draw_pixel(t, i, j, (out[i][j]))
-            quit
+            print(clamp(out[i][j] + 128)/256)
+            draw_pixel(t, 8*m + i, j, (clamp(out[i][j] + 128)/256, 0, 0))
 
     
 
