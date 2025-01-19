@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.fftpack import idct
-import math
 import turtle
 from huffman_decoder import *
 t = turtle.Turtle()
@@ -29,7 +28,7 @@ def IDCT(array_8x8):
 def matrix_operations(ZZ, MCU, quant):
     for i in range(64):
         MCU[i] *= quant[i]
-    ret = [[0, 0, 0, 0, 0, 0, 0, 0],
+    ret = [[0, 0, 0, 0, 0, 0, 0, 0],  # bruh
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
@@ -45,10 +44,10 @@ def matrix_operations(ZZ, MCU, quant):
     return ret
 
 
-zigzag = [[0, 1, 5, 6, 14, 15, 27, 28],
-          [2, 4, 7, 13, 16, 26, 29, 42],
-          [3, 8, 12, 17, 25, 30, 41, 43],
-          [9, 11, 18, 24, 31, 40, 44, 53],
+zigzag = [[0 , 1 , 5 , 6 , 14, 15, 27, 28],
+          [2 , 4 , 7 , 13, 16, 26, 29, 42],
+          [3 , 8 , 12, 17, 25, 30, 41, 43],
+          [9 , 11, 18, 24, 31, 40, 44, 53],
           [10, 19, 23, 32, 39, 45, 52, 54],
           [20, 22, 33, 38, 46, 51, 55, 60],
           [21, 34, 37, 47, 50, 56, 59, 61],
@@ -56,10 +55,10 @@ zigzag = [[0, 1, 5, 6, 14, 15, 27, 28],
 
 # Quantization tables
 
-DQT0 = [ 10, 7, 6, 10, 15, 25, 32, 38,
-         8, 8, 9, 12, 16, 36, 38, 34, 
-         9, 8, 10, 15, 25, 36, 43, 35, 
-         9, 11, 14, 18, 32, 54, 50, 39, 
+DQT0 = [ 10, 7 , 6 , 10, 15, 25, 32, 38,
+         8 , 8 , 9 , 12, 16, 36, 38, 34, 
+         9 , 8 , 10, 15, 25, 36, 43, 35, 
+         9 , 11, 14, 18, 32, 54, 50, 39, 
          11, 14, 23, 35, 43, 68, 64, 48, 
          15, 22, 34, 40, 51, 65, 71, 58, 
          31, 40, 49, 54, 64, 76, 75, 63,
@@ -74,7 +73,7 @@ DQT1 = [ 11, 11, 15, 29, 62, 62, 62, 62,
          62, 62, 62, 62, 62, 62, 62, 62, 
          62, 62, 62, 62, 62, 62, 62, 62 ]
 
-# Huffman tables
+# 
 bitstream = [[0], [-1, 1], list(range(-3, -1)) + list(range(2, 4)), list(range(-7, -3)) + list(range(4, 8)), list(range(-15, -7)) + list(range(8, 16)), list(range(-31, -15)) + list(range(16, 32)), list(range(-63, -31)) + list(range(32, 64))]
 
 def BitStream(category, bits, stream):
@@ -86,7 +85,7 @@ def BitStream(category, bits, stream):
         val = bits
     return val
 
-
+# somdeday I'll clean this bit up
 DHT10 = "10 00 02 01 03 03 02 04 03 05 05 04 04 00 00 01 7D 01 02 03 00 04 11 05 12 21 31 41 06 13 51 61 07 22 71 14 32 81 91 A1 08 23 42 B1 C1 15 52 D1 F0 24 33 62 72 82 09 0A 16 17 18 19 1A 25 26 27 28 29 2A 34 35 36 37 38 39 3A 43 44 45 46 47 48 49 4A 53 54 55 56 57 58 59 5A 63 64 65 66 67 68 69 6A 73 74 75 76 77 78 79 7A 83 84 85 86 87 88 89 8A 92 93 94 95 96 97 98 99 9A A2 A3 A4 A5 A6 A7 A8 A9 AA B2 B3 B4 B5 B6 B7 B8 B9 BA C2 C3 C4 C5 C6 C7 C8 C9 CA D2 D3 D4 D5 D6 D7 D8 D9 DA E1 E2 E3 E4 E5 E6 E7 E8 E9 EA F1 F2 F3 F4 F5 F6 F7 F8 F9 FA"
 DHT10 = DHT10.split(" ")
 for i in range(len(DHT10)): DHT10[i] = int(DHT10[i], 16)
@@ -171,8 +170,4 @@ for m in range(10):
     print('  ')
     for i in range(8):
         for j in range(8):
-            print(clamp(out[i][j] + 128)/256)
-            draw_pixel(t, 8*m + i, j, (clamp(out[i][j] + 128)/256, 0, 0))
-
-    
-
+            draw_pixel(t, 8*m + i, m%8 + j, (clamp(out[i][j] + 128)/256, 0, 0))
