@@ -1,4 +1,3 @@
-import re
 
 class Node: # Standard recursive node adapted to track layer for assisting decoding 
     def __init__(self, val, layer):
