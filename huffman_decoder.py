@@ -24,9 +24,15 @@ class H_tree: # Huffman tree
     def _add(self, count, sym, node):
         if len(sym) == 0:
             return
+        
         if count[node.layer] != 0:
             node.val = sym.pop(0)
             count[node.layer] -= 1
+        elif len(sym) == 2:
+            node.left = Node(sym.pop(0), node.layer + 1)
+            node.right = Node(sym.pop(0), node.layer + 1)
+            self._add(count, sym, node.left)
+            self._add(count, sym, node.right)
         else:
             node.left = Node(None, node.layer + 1)
             node.right = Node(None, node.layer + 1)
@@ -40,7 +46,7 @@ class H_tree: # Huffman tree
     def _view(self, node):
         if node:
             self._view(node.left)
-            print(node.val, end = " ")
+            print(str(node.val) + '(' + str(node.layer) +')', end = " ")
             self._view(node.right)
 
     def decode(self, dat):
@@ -64,10 +70,6 @@ class H_tree: # Huffman tree
                 if (node.left == None) and (node.right == None):
                     decoded = node.val
                     return decoded, dat
-                
-
-    
-
 
 if __name__ == '__main__':
 
