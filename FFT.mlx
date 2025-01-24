@@ -1,0 +1,21 @@
+%% FT for finding largest frequency component
+
+Fs = 1000;           % (1 / time step
+T = 1/Fs;            % period 
+L = 1000;            % Time span in terms of number of time stepa
+t = (0:L-1)*T;       % time 
+
+dominantFrequency = zeros(1,); % fill with number of columns i.e if you're varying for 10 values of mass then 10
+A = importdata("output.txt");
+for i=::  % enter colomnu numbers in this loop
+    Y = fft(A(:,i));
+    P2 = abs(Y/L);        
+    P1 = P2(1:L/2+1);     % Single-sided spectrum
+    P1(2:end-1) = 2*P1(2:end-1);
+
+    f = Fs*(0:(L/2))/L;
+    
+    % find largest frequency component
+    [maxAmplitude, idx] = max(P1);
+    dominantFrequency((i-2)/3+1) = f(idx);    
+end
