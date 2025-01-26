@@ -8,7 +8,6 @@ screen = turtle.Screen()
 screen.bgcolor("white")
 screen.tracer(0)  # Disable animation
 t.penup()
-t.speed(10)
 
 def draw_pixel(turtle, x, y, color):  # color is a tuple here
     turtle.setposition(x, y)
@@ -30,8 +29,6 @@ def IDCT(array_8x8):
     return idct_2d
     
 def matrix_operations(ZZ, MCU, quant):
-    for i in range(64):
-        MCU[i] *= quant[i]
     ret = [[0, 0, 0, 0, 0, 0, 0, 0],  # bruh
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
@@ -42,7 +39,7 @@ def matrix_operations(ZZ, MCU, quant):
            [0, 0, 0, 0, 0, 0, 0, 0]]
     for i in range(8):
         for j in range(8):
-            ret[i][j] = MCU[ZZ[i][j]]
+            ret[i][j] = MCU[ZZ[i][j]] * quant[i][j]
     return ret
 
 
@@ -57,29 +54,25 @@ zigzag = [[0 , 1 , 5 , 6 , 14, 15, 27, 28],
 
 # Quantization tables
 
-DQT0 = [ 10, 7 , 6 , 10, 15, 25, 32, 38,
-         8 , 8 , 9 , 12, 16, 36, 38, 34, 
-         9 , 8 , 10, 15, 25, 36, 43, 35, 
-         9 , 11, 14, 18, 32, 54, 50, 39, 
-         11, 14, 23, 35, 43, 68, 64, 48, 
-         15, 22, 34, 40, 51, 65, 71, 58, 
-         31, 40, 49, 54, 64, 76, 75, 63,
-         45, 58, 59, 61, 70, 63, 64, 62 ]
+DQT0 = [ [10, 7 , 6 , 10, 15, 25, 32, 38],
+         [8 , 8 , 9 , 12, 16, 36, 38, 34], 
+         [9 , 8 , 10, 15, 25, 36, 43, 35], 
+         [9 , 11, 14, 18, 32, 54, 50, 39], 
+         [11, 14, 23, 35, 43, 68, 64, 48], 
+         [15, 22, 34, 40, 51, 65, 71, 58], 
+         [31, 40, 49, 54, 64, 76, 75, 63],
+         [45, 58, 59, 61, 70, 63, 64, 62] ]
 
-DQT1 = [ 11, 11, 15, 29, 62, 62, 62, 62,
-         11, 13, 16, 41, 62, 62, 62, 62, 
-         15, 16, 35, 62, 62, 62, 62, 62, 
-         29, 41, 62, 62, 62, 62, 62, 62, 
-         62, 62, 62, 62, 62, 62, 62, 62, 
-         62, 62, 62, 62, 62, 62, 62, 62, 
-         62, 62, 62, 62, 62, 62, 62, 62, 
-         62, 62, 62, 62, 62, 62, 62, 62 ]
+DQT1 = [ [11, 11, 15, 29, 62, 62, 62, 62],
+         [11, 13, 16, 41, 62, 62, 62, 62], 
+         [15, 16, 35, 62, 62, 62, 62, 62], 
+         [29, 41, 62, 62, 62, 62, 62, 62], 
+         [62, 62, 62, 62, 62, 62, 62, 62], 
+         [62, 62, 62, 62, 62, 62, 62, 62], 
+         [62, 62, 62, 62, 62, 62, 62, 62], 
+         [62, 62, 62, 62, 62, 62, 62, 62] ]
 
-# bitstream table
-bitstream = [[0], [-1, 1], list(range(-3, -1)) + list(range(2, 4)), list(range(-7, -3)) + list(range(4, 8)), list(range(-15, -7)) + list(range(8, 16)), list(range(-31, -15)) + list(range(16, 32)), list(range(-63, -31)) + list(range(32, 64)), list(range(-127, -63)) + list(range(64, 128)), list(range(-255, -127)) + list(range(128, 256)), list(range(-511, -255)) + list(range(256, 512)), list(range(-1023, -511)) + list(range(512, 1024)), list(range(-2047, -1023)) + list(range(1024, 2048))]
-
-def BitStream(category, bits, stream):
-    stream[category]
+def BitStream(category, bits):
 
     if bits < 2**(category - 1):
         val = 1 - 2**(category) + bits
@@ -112,7 +105,8 @@ H10 = H_tree()
 H10.gen(DHT10[1:17],DHT10[17:])
 
 
-f = open('oliver_dat.txt', 'r')
+
+f = open('oliver_dat2.txt', 'r')
 dat = f.read()
 dat = re.split(' |\n', dat)
 dc_L = 0
@@ -144,7 +138,7 @@ for y in range(30):
                     size -= 1
 
 
-            dc_L += BitStream(decoded, dc_temp, bitstream)
+            dc_L += BitStream(decoded, dc_temp)
             MCU.append(dc_L)
 
             H10.last_byte = H00.last_byte
@@ -170,8 +164,8 @@ for y in range(30):
                         H10.dec_pos = H10.dec_pos % 8
                         size -= 1
 
-                MCU.append(BitStream(decoded & 0x0f, val, bitstream))
-                if not BitStream(decoded & 0x0f, val, bitstream):
+                MCU.append(BitStream(decoded & 0x0f, val))
+                if not BitStream(decoded & 0x0f, val):
                     H00.last_byte = H10.last_byte
                     H00.dec_pos = H10.dec_pos + decoded # this shift is required
                     break
@@ -208,7 +202,7 @@ for y in range(30):
                     size -= 1
 
 
-            dc_C += BitStream(decoded, dc_temp, bitstream)
+            dc_C += BitStream(decoded, dc_temp)
             MCU.append(dc_C)
 
             H11.last_byte = H01.last_byte
@@ -234,8 +228,8 @@ for y in range(30):
                         H11.dec_pos = H11.dec_pos % 8
                         size -= 1
 
-                MCU.append(BitStream(decoded & 0x0f, val, bitstream))
-                if not BitStream(decoded & 0x0f, val, bitstream):
+                MCU.append(BitStream(decoded & 0x0f, val))
+                if not BitStream(decoded & 0x0f, val):
                     H01.last_byte = H11.last_byte
                     H01.dec_pos = H11.dec_pos + decoded # this shift is required
                     break
