@@ -91,7 +91,7 @@ for i in range(len(DHT10)): DHT10[i] = int(DHT10[i], 16)
 DHT01 = "01 00 03 01 01 01 01 01 01 01 01 01 00 00 00 00 00 00 01 02 03 04 05 06 07 08 09 0A 0B"
 DHT01 = DHT01.split(" ")
 for i in range(len(DHT01)): DHT01[i] = int(DHT01[i], 16)
-DHT11 = "11 00 02 01 02 04 04 03 04 07 05 04 04 00 01 02 77 00 01 02 03 11 04 05 21 31 06 12 41 51 07 61 71 13 22 32 81 08 14 42 91 A1 B1 C1 09 23 33 52 F0 15 62 72 D1 0A 16 24 34 E1 25 F1 17 18 19 1A 26 27 28 29 2A 35 36 37 38 39 3A 43 44 45 46 47 48 49 4A 53 54 55 56 57 58 59 5A 63 64 65 66 67 68 69 6A 73 74 75 76 77 78 79 7A 82 83 84 85 86 87 88 89 8A 92 93 94 95 96 97 98 99 9A A2 A3 A4 A5 A6 A7 A8 A9AA B2 B3 B4 B5 B6 B7 B8 B9 BA C2 C3 C4 C5 C6 C7 C8 C9 CA D2 D3 D4 D5 D6 D7 D8 D9 DA E2 E3 E4 E5 E6 E7 E8 E9 EA F2 F3 F4 F5 F6 F7 F8 F9 FA"
+DHT11 = "11 00 02 01 02 04 04 03 04 07 05 04 04 00 01 02 77 00 01 02 03 11 04 05 21 31 06 12 41 51 07 61 71 13 22 32 81 08 14 42 91 A1 B1 C1 09 23 33 52 F0 15 62 72 D1 0A 16 24 34 E1 25 F1 17 18 19 1A 26 27 28 29 2A 35 36 37 38 39 3A 43 44 45 46 47 48 49 4A 53 54 55 56 57 58 59 5A 63 64 65 66 67 68 69 6A 73 74 75 76 77 78 79 7A 82 83 84 85 86 87 88 89 8A 92 93 94 95 96 97 98 99 9A A2 A3 A4 A5 A6 A7 A8 A9 AA B2 B3 B4 B5 B6 B7 B8 B9 BA C2 C3 C4 C5 C6 C7 C8 C9 CA D2 D3 D4 D5 D6 D7 D8 D9 DA E2 E3 E4 E5 E6 E7 E8 E9 EA F2 F3 F4 F5 F6 F7 F8 F9 FA"
 DHT11 = DHT11.split(" ")
 for i in range(len(DHT11)): DHT11[i] = int(DHT11[i], 16)
 
@@ -114,7 +114,7 @@ dc_C = 0
 
 for y in range(30):
     for x in range(20):
-        if len(dat) < 100:  # fix this
+        if len(dat) < 10:  # fix this
             break
         MCU_coords = [[16*x, 8*y], [8 + 16*x, 8*y]]
         for m in range(2):  # this is derived from the sampling factor
@@ -176,7 +176,7 @@ for y in range(30):
             print('  ')
             for i in range(8):
                 for j in range(8):
-                    draw_pixel(t, MCU_coords[m][0] + i, -MCU_coords[m][1] + j, (clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256))
+                    draw_pixel(t, MCU_coords[m][0] + j, -MCU_coords[m][1] + (7 - i), (clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256))
 
         H01.last_byte = H00.last_byte
         H01.dec_pos = H00.dec_pos

@@ -28,7 +28,7 @@ class H_tree: # Huffman tree
         if count[node.layer] != 0:
             node.val = sym.pop(0)
             count[node.layer] -= 1
-        elif len(sym) == 2:
+        elif len(sym) == 2:  # accounts for last row in H tree
             node.left = Node(sym.pop(0), node.layer + 1)
             node.right = Node(sym.pop(0), node.layer + 1)
             self._add(count, sym, node.left)
