@@ -114,11 +114,8 @@ dc_C = 0
 
 for y in range(30):
     for x in range(20):
-        if len(dat) < 10:  # fix this
-            break
         MCU_coords = [[16*x, 8*y], [8 + 16*x, 8*y]]
         for m in range(2):  # this is derived from the sampling factor
-            print(' ')
             MCU = []
             decoded, dat = H00.decode(dat)
             size = decoded
@@ -147,7 +144,6 @@ for y in range(30):
 
             while 1:
                 decoded, dat = H10.decode(dat)
-                print(decoded & 0x0f)
                 zeros = (decoded & 0xf0) >> 4
                 MCU += zeros * [0]
                 size = decoded & 0x0f
@@ -182,7 +178,6 @@ for y in range(30):
         H01.dec_pos = H00.dec_pos
 
         for m in range(2):
-            print(' ')
             MCU = []
             decoded, dat = H01.decode(dat)
             size = decoded
@@ -211,7 +206,6 @@ for y in range(30):
 
             while 1:
                 decoded, dat = H11.decode(dat)
-                print(decoded & 0x0f)
                 zeros = (decoded & 0xf0) >> 4
                 MCU += zeros * [0]
                 size = decoded & 0x0f
