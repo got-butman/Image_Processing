@@ -118,6 +118,7 @@ for y in range(30):
             break
         MCU_coords = [[16*x, 8*y], [8 + 16*x, 8*y]]
         for m in range(2):  # this is derived from the sampling factor
+            print(' ')
             MCU = []
             decoded, dat = H00.decode(dat)
             size = decoded
@@ -146,6 +147,7 @@ for y in range(30):
 
             while 1:
                 decoded, dat = H10.decode(dat)
+                print(decoded & 0x0f)
                 zeros = (decoded & 0xf0) >> 4
                 MCU += zeros * [0]
                 size = decoded & 0x0f
@@ -167,13 +169,11 @@ for y in range(30):
                 MCU.append(BitStream(decoded & 0x0f, val))
                 if not BitStream(decoded & 0x0f, val):
                     H00.last_byte = H10.last_byte
-                    H00.dec_pos = H10.dec_pos + decoded # this shift is required
+                    H00.dec_pos = H10.dec_pos
                     break
 
             MCU += [0] * (64 - len(MCU))
             out = IDCT(np.array(matrix_operations(zigzag, MCU, DQT0), dtype=float))
-            print(out)
-            print('  ')
             for i in range(8):
                 for j in range(8):
                     draw_pixel(t, MCU_coords[m][0] + j, -MCU_coords[m][1] + (7 - i), (clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256, clamp(out[i][j] + 128)/256))
@@ -182,6 +182,7 @@ for y in range(30):
         H01.dec_pos = H00.dec_pos
 
         for m in range(2):
+            print(' ')
             MCU = []
             decoded, dat = H01.decode(dat)
             size = decoded
@@ -210,6 +211,7 @@ for y in range(30):
 
             while 1:
                 decoded, dat = H11.decode(dat)
+                print(decoded & 0x0f)
                 zeros = (decoded & 0xf0) >> 4
                 MCU += zeros * [0]
                 size = decoded & 0x0f
@@ -231,10 +233,11 @@ for y in range(30):
                 MCU.append(BitStream(decoded & 0x0f, val))
                 if not BitStream(decoded & 0x0f, val):
                     H01.last_byte = H11.last_byte
-                    H01.dec_pos = H11.dec_pos + decoded # this shift is required
+                    H01.dec_pos = H11.dec_pos
                     break
         H00.last_byte = H01.last_byte
         H00.dec_pos = H01.dec_pos
+        print('  ')
 
 screen.update()
 screen.mainloop()
