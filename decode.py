@@ -106,7 +106,7 @@ H10.gen(DHT10[1:17],DHT10[17:])
 
 
 
-f = open('oliver_dat2.txt', 'r')
+f = open('oliver_dat.txt', 'r')
 dat = f.read()
 dat = re.split(' |\n', dat)
 dc_L = 0
@@ -231,7 +231,6 @@ for y in range(30):
                     break
         H00.last_byte = H01.last_byte
         H00.dec_pos = H01.dec_pos
-        print('  ')
 
 screen.update()
 screen.mainloop()
